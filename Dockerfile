@@ -1,23 +1,23 @@
-FROM liammartens/php
+FROM webdevops/php-apache:alpine
 
 # @env directus versions
 ENV DIRECTUS_VERSION=6.4.9
 
-# @user root for build
-USER root
-
 # @run clone
 RUN curl -L "https://github.com/directus/directus/archive/${DIRECTUS_VERSION}.zip" -o directus.zip
-RUN unzip directus.zip && rm directus.zip && mv directus-${DIRECTUS_VERSION} /directus
+RUN rmdir /app && unzip directus.zip && rm directus.zip && mv directus-${DIRECTUS_VERSION} /app
 
 # @run own directus
-RUN chown -R ${USER}:${USER} /directus && chmod -R 750 /directus
+RUN chown -R application:www-data /app && chmod -R 755 /app
 
 # @workdir go to directus
-WORKDIR /directus
+WORKDIR /app
 
-# @user back to regular user
-USER ${USER}
+# @user regular user for composer
+USER application
 
 # @run install composer
 RUN composer install
+
+# @user switch back to root
+USER root
